@@ -1,3 +1,4 @@
+/* eslint-disable strict */
 require('dotenv').config();
 const express = require('express');
 const morgan = require('morgan');
@@ -40,9 +41,11 @@ app.use(helmet());
 app.use(cors());
 app.use(express.json());
 
+
 app.get('/users', (req, res) => {
   return res.json(users)
 })
+
 
 app.post('/users', (req, res) => {
   const {username, password, favoriteClub, newsLetter=false} = req.body;
@@ -82,11 +85,30 @@ app.post('/users', (req, res) => {
 
   return res
     .status(201)
-    .json(newUser.id)
-})
+    .json(newUser.id);
+});
+
+
+app.delete('/users/:userid', (req, res) => {
+  
+  const userindex = users.findIndex( user => user.id === req.params.userid);
+
+  if (userindex >= 0) {
+    users.splice(userindex, 1);
+    return res
+      .status(204)
+      .json(users);
+  }
+
+  return res 
+    .status(400)
+    .send('User id does not exist');
+
+});
+
 
 app.use(function errorHandler(error, req, res, next) {
-  let response
+  let response;
   if (NODE_ENV === 'production') {
     response = { error: { message: 'server error' } };
   } else {
